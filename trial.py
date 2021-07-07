@@ -575,7 +575,15 @@ st.pyplot(fig1)
 st.markdown('____')
 st.subheader("**Technicals**")
 ##############################################################################
-#quat=stock_name.calendar
+quat=stock_name.major_holders
+quat = quat.rename(columns={0: "%",
+                            1: "Holders"})
+quat.set_index('%', inplace=True)
+st.table(quat)
+
+quat=stock_name.quarterly_financials
+st.table(quat)
+
 
 
 
