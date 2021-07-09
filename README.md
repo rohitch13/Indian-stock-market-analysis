@@ -15,6 +15,6 @@ Any Indian stock can be searched on sidebar, then number of days for moving aver
 
 Technicals part is in process.
 
+![3](https://user-images.githubusercontent.com/71059728/125024506-883bb100-e09e-11eb-9522-4c710e07b656.PNG)
 
 
-Future plan: to add technical and financial details 
