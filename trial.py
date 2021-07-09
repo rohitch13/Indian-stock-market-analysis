@@ -14,6 +14,11 @@ import numpy as np
 import matplotlib.ticker as ticker
 import yfinance as yf 
 from matplotlib.ticker import (MultipleLocator, AutoMinorLocator)
+from selenium import webdriver
+from bs4 import BeautifulSoup
+import requests
+import SessionState
+
 
 os.chdir('/home/rohit/Documents/Python/Project_stocks')
 
@@ -568,25 +573,66 @@ ax.xaxis.set_major_locator(MultipleLocator(12))
 #ax.set_xticks(data['Time'])
 ax.tick_params(axis="x", which="both", rotation=45,labelsize=6,direction='out')
 ax.tick_params(axis="y", which="both", rotation=45,labelsize=6,direction='out')
-fig1.suptitle("Previous day chart", fontsize=12)
+fig1.suptitle("Live chart", fontsize=12)
 st.pyplot(fig1)
 
 ##############################################################################
 st.markdown('____')
 st.subheader("**Technicals**")
 ##############################################################################
-quat=stock_name.major_holders
-quat = quat.rename(columns={0: "%",
-                            1: "Holders"})
-quat.set_index('%', inplace=True)
-st.table(quat)
+holders=stock_name.major_holders
+holders = holders.rename(columns={0: "%",
+                                  1: "Holders"})
+holders.set_index('%', inplace=True)
+st.subheader("*Major holders*")
+st.table(holders)
 
-quat=stock_name.quarterly_financials
-st.table(quat)
+quat_earnings1=stock_name.quarterly_earnings
+quat_earnings1['%']=quat_earnings1['Earnings'].pct_change()
+quat_earnings1['Revenue1'] = '₹' + (quat_earnings1['Revenue'].astype(float)/10000000).astype(str) + ' crores'
+quat_earnings1['Earnings1'] = '₹' + (quat_earnings1['Earnings'].astype(float)/10000000).astype(str) + ' crores'
+st.subheader("*Quarterly earnings and Yearly earnings*")
+
+earnings=stock_name.earnings
+earnings['%']=earnings['Earnings'].pct_change()
+earnings['Revenue1'] = '₹' + (earnings['Revenue'].astype(float)/10000000).astype(str) + ' crores'
+earnings['Earnings1'] = '₹' + (earnings['Earnings'].astype(float)/10000000).astype(str) + ' crores'
+
+b=stock_name.quarterly_financials
+
+fig3, (ax3, ax4) = plt.subplots(1,2, figsize=(10,3))
+ax3.bar(quat_earnings1.index, (quat_earnings1['Earnings'].astype(float)/10000000))
+ax4.bar(earnings.index.astype(str), (earnings['Earnings'].astype(float)/10000000))
+ax3.tick_params(axis="x", which="both", rotation=45,labelsize=6,direction='out')
+ax4.tick_params(axis="x", which="both", rotation=45,labelsize=6,direction='out')
+ax3.set_ylabel('Earnings (in crores)', fontsize=7,fontdict=dict(weight='bold'))
+ax4.set_ylabel('Earnings (in crores)', fontsize=7,fontdict=dict(weight='bold'))
+ax3.bar_label(ax3.containers[0])
+ax4.bar_label(ax4.containers[0])
+ax3.get_yaxis().set_ticks([])
+ax4.get_yaxis().set_ticks([])
+ax3.set_title('Quarterly Earnings',fontweight='bold')
+ax4.set_title('Yearly Earnings',fontweight='bold')
+ax3.spines["top"].set_visible(False)
+ax3.spines["right"].set_visible(False)
+ax3.spines["left"].set_visible(False)
+ax4.spines["top"].set_visible(False)
+ax4.spines["right"].set_visible(False)
+ax4.spines["left"].set_visible(False)
+plt.show()
+st.pyplot(fig3)
+
+
+info=stock_name.info
+
+# session_state = SessionState.get(checkboxed=False)
+
+# if st.button('Click me') or session_state.checkboxed:
+#     session_state.checkboxed = True
+#     if st.button("Click me too !"):
+#         st.write("Hello world")
 
 
 
-
-
-
-
+    
+ 
