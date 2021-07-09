@@ -17,8 +17,7 @@ from matplotlib.ticker import (MultipleLocator, AutoMinorLocator)
 from selenium import webdriver
 from bs4 import BeautifulSoup
 import requests
-import SessionState
-
+import datetime
 
 os.chdir('/home/rohit/Documents/Python/Project_stocks')
 
@@ -62,6 +61,42 @@ df["VMA"]=df["Volume"].rolling(vma).mean()
 
 period=st.sidebar.select_slider('Slide to select', options=['5d','1mo','3mo','6mo','1y','2y','5y','10y','max'])
 
+two=stock_name.history(period='2d', interval='1m')
+two.reset_index(inplace=True)
+two['Datetime']=two['Datetime'].dt.tz_localize(None)
+two['Dates'] = pd.to_datetime(two['Datetime']).dt.date
+two['Time'] = pd.to_datetime(two['Datetime']).dt.time
+
+time_1 = datetime.datetime.now().time()
+time_2 = datetime.datetime.now().time().replace(minute=(time_1.minute-1),second=00,microsecond=00)
+datetime.datetime.now().date()
+index_value=two[two['Dates']==datetime.datetime.now().date()].index.values[0]
+two_initial=two.iloc[:(index_value),:]
+two_final=two.iloc[index_value:,:]
+
+index_value_1=two_initial[two_initial['Time']==time_2].index.values[0]
+index_value_2=two_final[two_final['Time']==time_2].index.values[0]
+index_value_2 -= 1
+two_initial=two_initial.iloc[:(index_value_1+1),:]
+two_final=two_final.iloc[:(index_value_2),:]
+
+volume_initial=two_initial['Volume'].sum()
+volume_final=two_final['Volume'].sum()
+volume_percent_change=(((volume_final-volume_initial)/volume_initial)*100).round(2)
+
+
+close_initial=two['Close'][index_value-1].round(2)
+close_final=two_final['Close'][index_value_2].round(2)
+close_percent_change=(((close_final-close_initial)/close_initial)*100).round(2)
+
+status_data = {'Price':             close_final,
+               'Price % change':    close_percent_change,
+               'Volume % change':   volume_percent_change}
+
+status=pd.DataFrame(status_data,index=['0'])
+
+st.table(status)
+
 if (period=='5d'):
     df=df.iloc[-5:,:]
     
@@ -87,7 +122,7 @@ if (period=='5d'):
     ax1.xaxis.set_major_locator(MultipleLocator(1))
     ax1.xaxis.set_major_formatter(dayFormatter)
     #plot_day_summary(ax, quotes, ticksize=3)
-    candlestick_ohlc(ax1, quotes, width=0.6)
+    candlestick_ohlc(ax1, quotes, width=0.6,colorup='g',colordown='r')
     ax1.plot(df['Date'],df["MA"],linewidth=0.4,color='g')
     ax1.xaxis_date()
     ax1.autoscale_view()
@@ -141,7 +176,7 @@ elif (period=='1mo'):
     ax1.xaxis.set_major_formatter(dayFormatter)
     #ax1.xaxis.set_minor_formatter(dayFormatter)
     #plot_day_summary(ax, quotes, ticksize=3)
-    candlestick_ohlc(ax1, quotes, width=0.6)
+    candlestick_ohlc(ax1, quotes, width=0.6,colorup='g',colordown='r')
     ax1.plot(df['Date'],df["MA"],linewidth=0.4,color='g')
     ax1.xaxis_date()
     #ax1.autoscale_view()
@@ -197,7 +232,7 @@ elif (period=='3mo'):
     ax1.xaxis.set_major_formatter(dayFormatter)
     #ax1.xaxis.set_minor_formatter(dayFormatter)
     #plot_day_summary(ax, quotes, ticksize=3)
-    candlestick_ohlc(ax1, quotes, width=0.6)
+    candlestick_ohlc(ax1, quotes, width=0.6,colorup='g',colordown='r')
     ax1.plot(df['Date'],df["MA"],linewidth=0.4,color='g')
     ax1.xaxis_date()
     #ax1.autoscale_view()
@@ -252,7 +287,7 @@ elif (period=='6mo'):
     ax1.xaxis.set_major_formatter(dayFormatter)
     #ax1.xaxis.set_minor_formatter(dayFormatter)
     #plot_day_summary(ax, quotes, ticksize=3)
-    candlestick_ohlc(ax1, quotes, width=0.6)
+    candlestick_ohlc(ax1, quotes, width=0.6,colorup='g',colordown='r')
     ax1.plot(df['Date'],df["MA"],linewidth=0.4,color='g')
     ax1.xaxis_date()
     #ax1.autoscale_view()
@@ -307,7 +342,7 @@ elif (period=='1y'):
     ax1.xaxis.set_major_formatter(dayFormatter)
     #ax1.xaxis.set_minor_formatter(dayFormatter)
     #plot_day_summary(ax, quotes, ticksize=3)
-    candlestick_ohlc(ax1, quotes, width=0.6)
+    candlestick_ohlc(ax1, quotes, width=0.6,colorup='g',colordown='r')
     ax1.plot(df['Date'],df["MA"],linewidth=0.4,color='g')
     ax1.xaxis_date()
     #ax1.autoscale_view()
@@ -362,7 +397,7 @@ elif (period=='2y'):
     ax1.xaxis.set_major_formatter(dayFormatter)
     #ax1.xaxis.set_minor_formatter(dayFormatter)
     #plot_day_summary(ax, quotes, ticksize=3)
-    candlestick_ohlc(ax1, quotes, width=0.6)
+    candlestick_ohlc(ax1, quotes, width=0.6,colorup='g',colordown='r')
     ax1.plot(df['Date'],df["MA"],linewidth=0.4,color='g')
     ax1.xaxis_date()
     #ax1.autoscale_view()
@@ -417,7 +452,7 @@ elif (period=='5y'):
     ax1.xaxis.set_major_formatter(dayFormatter)
     #ax1.xaxis.set_minor_formatter(dayFormatter)
     #plot_day_summary(ax, quotes, ticksize=3)
-    candlestick_ohlc(ax1, quotes, width=0.6)
+    candlestick_ohlc(ax1, quotes, width=0.6,colorup='g',colordown='r')
     ax1.plot(df['Date'],df["MA"],linewidth=0.4,color='g')
     ax1.xaxis_date()
     #ax1.autoscale_view()
@@ -472,7 +507,7 @@ elif (period=='10y'):
     ax1.xaxis.set_major_formatter(dayFormatter)
     #ax1.xaxis.set_minor_formatter(dayFormatter)
     #plot_day_summary(ax, quotes, ticksize=3)
-    candlestick_ohlc(ax1, quotes, width=0.6)
+    candlestick_ohlc(ax1, quotes, width=0.6,colorup='g',colordown='r')
     ax1.plot(df['Date'],df["MA"],linewidth=0.4,color='g')
     ax1.xaxis_date()
     #ax1.autoscale_view()
@@ -527,7 +562,7 @@ elif (period=='max'):
     ax1.xaxis.set_major_formatter(dayFormatter)
     #ax1.xaxis.set_minor_formatter(dayFormatter)
     #plot_day_summary(ax, quotes, ticksize=3)
-    candlestick_ohlc(ax1, quotes, width=0.6)
+    candlestick_ohlc(ax1, quotes, width=0.6,colorup='g',colordown='r')
     ax1.plot(df['Date'],df["MA"],linewidth=0.4,color='g')
     ax1.xaxis_date()
     #ax1.autoscale_view()
@@ -625,7 +660,57 @@ st.pyplot(fig3)
 
 info=stock_name.info
 
+stock_name = yf.Ticker('ADANITRANS.NS')
+two=stock_name.history(period='2d', interval='1m')
+two.reset_index(inplace=True)
+two['Datetime']=two['Datetime'].dt.tz_localize(None)
+two['Dates'] = pd.to_datetime(two['Datetime']).dt.date
+two['Time'] = pd.to_datetime(two['Datetime']).dt.time
+
+time_1 = datetime.datetime.now().time()
+time_2 = datetime.datetime.now().time().replace(minute=(time_1.minute-1),second=00,microsecond=00)
+datetime.datetime.now().date()
+index_value=two[two['Dates']==datetime.datetime.now().date()].index.values[0]
+two_initial=two.iloc[:(index_value),:]
+two_final=two.iloc[index_value:,:]
+
+index_value_1=two_initial[two_initial['Time']==time_2].index.values[0]
+index_value_2=two_final[two_final['Time']==time_2].index.values[0]
+index_value_2 -= 1
+two_initial=two_initial.iloc[:(index_value_1+1),:]
+two_final=two_final.iloc[:(index_value_2),:]
+
+volume_initial=two_initial['Volume'].sum()
+volume_final=two_final['Volume'].sum()
+volume_percent_change=(((volume_final-volume_initial)/volume_initial)*100).round(2)
 
 
-    
- 
+close_initial=two['Close'][index_value-1].round(2)
+close_final=two_final['Close'][index_value_2].round(2)
+close_percent_change=(((close_final-close_initial)/close_initial)*100).round(2)
+
+status_data = {'Price':             close_final,
+               'Price % change':    close_percent_change,
+               'Volume % change':   volume_percent_change}
+
+status=pd.DataFrame(status_data,index=['0'])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
