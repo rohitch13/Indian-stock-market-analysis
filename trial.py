@@ -625,13 +625,6 @@ st.pyplot(fig3)
 
 info=stock_name.info
 
-# session_state = SessionState.get(checkboxed=False)
-
-# if st.button('Click me') or session_state.checkboxed:
-#     session_state.checkboxed = True
-#     if st.button("Click me too !"):
-#         st.write("Hello world")
-
 
 
     
