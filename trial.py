@@ -61,41 +61,64 @@ df["VMA"]=df["Volume"].rolling(vma).mean()
 
 period=st.sidebar.select_slider('Slide to select', options=['5d','1mo','3mo','6mo','1y','2y','5y','10y','max'])
 
+##############################################################################
+index_name = yf.Ticker('^NSEI')
+index_data=index_name.history(period='max')
+index_data_last_two=index_data.iloc[-2:,:]
+index_percent_change=((index_data_last_two['Close'][1]-index_data_last_two['Close'][0])/index_data_last_two['Close'][0])*100
+index_value=index_data.iloc[-1:,[3]].values[0][0]
+
+index_data_table = {'Value':             index_value,
+                    'Value % change':    index_percent_change}
+
+index_status=pd.DataFrame(index_data_table,index=['NIFTY50'])
+
+
+st.table(index_status)
+
+
+####################################Status####################################
+
 two=stock_name.history(period='2d', interval='1m')
 two.reset_index(inplace=True)
 two['Datetime']=two['Datetime'].dt.tz_localize(None)
 two['Dates'] = pd.to_datetime(two['Datetime']).dt.date
 two['Time'] = pd.to_datetime(two['Datetime']).dt.time
-
+date_today=two.iloc[-1:,[8]].values[0][0]
+time_latest=two.iloc[-1:,[9]].values[0][0]
 time_1 = datetime.datetime.now().time()
-time_2 = datetime.datetime.now().time().replace(minute=(time_1.minute-1),second=00,microsecond=00)
+time_2 = time_latest.replace(minute=(time_1.minute-1),second=00,microsecond=00)
 datetime.datetime.now().date()
-index_value=two[two['Dates']==datetime.datetime.now().date()].index.values[0]
+index_value=two[two['Dates']==date_today].index.values[0]
 two_initial=two.iloc[:(index_value),:]
 two_final=two.iloc[index_value:,:]
-
-index_value_1=two_initial[two_initial['Time']==time_2].index.values[0]
-index_value_2=two_final[two_final['Time']==time_2].index.values[0]
-index_value_2 -= 1
-two_initial=two_initial.iloc[:(index_value_1+1),:]
-two_final=two_final.iloc[:(index_value_2),:]
-
-volume_initial=two_initial['Volume'].sum()
-volume_final=two_final['Volume'].sum()
-volume_percent_change=(((volume_final-volume_initial)/volume_initial)*100).round(2)
-
-
-close_initial=two['Close'][index_value-1].round(2)
-close_final=two_final['Close'][index_value_2].round(2)
-close_percent_change=(((close_final-close_initial)/close_initial)*100).round(2)
-
-status_data = {'Price':             close_final,
-               'Price % change':    close_percent_change,
-               'Volume % change':   volume_percent_change}
-
-status=pd.DataFrame(status_data,index=['0'])
-
-st.table(status)
+try:
+    index_value_1=two_initial[two_initial['Time']==time_2].index.values[0]
+    index_value_2=two_final[two_final['Time']==time_2].index.values[0]
+    index_value_2 -= 1
+    two_initial=two_initial.iloc[:(index_value_1+1),:]
+    two_final=two_final.iloc[:(index_value_2),:]
+    
+    volume_initial=two_initial['Volume'].sum()
+    volume_final=two_final['Volume'].sum()
+    volume_percent_change=(((volume_final-volume_initial)/volume_initial)*100).round(2)
+    
+    close_initial=two['Close'][index_value-1].round(2)
+    close_final=two_final['Close'][index_value_2].round(2)
+    close_percent_change=(((close_final-close_initial)/close_initial)*100).round(2)
+    
+    status_data = {'Price':             close_final,
+                   'Price % change':    close_percent_change,
+                   'Volume % change':   volume_percent_change}
+    
+    status=pd.DataFrame(status_data,index=['Stock'])
+    
+    
+    st.table(status)
+except IndexError:
+    st.info('yfinance has not uploaded live data yet')
+except KeyError:
+    st.info('yfinance has not uploaded live data yet')
 
 if (period=='5d'):
     df=df.iloc[-5:,:]
@@ -657,49 +680,11 @@ ax4.spines["left"].set_visible(False)
 plt.show()
 st.pyplot(fig3)
 
-
-info=stock_name.info
-
-stock_name = yf.Ticker('ADANITRANS.NS')
-two=stock_name.history(period='2d', interval='1m')
-two.reset_index(inplace=True)
-two['Datetime']=two['Datetime'].dt.tz_localize(None)
-two['Dates'] = pd.to_datetime(two['Datetime']).dt.date
-two['Time'] = pd.to_datetime(two['Datetime']).dt.time
-
-time_1 = datetime.datetime.now().time()
-time_2 = datetime.datetime.now().time().replace(minute=(time_1.minute-1),second=00,microsecond=00)
-datetime.datetime.now().date()
-index_value=two[two['Dates']==datetime.datetime.now().date()].index.values[0]
-two_initial=two.iloc[:(index_value),:]
-two_final=two.iloc[index_value:,:]
-
-index_value_1=two_initial[two_initial['Time']==time_2].index.values[0]
-index_value_2=two_final[two_final['Time']==time_2].index.values[0]
-index_value_2 -= 1
-two_initial=two_initial.iloc[:(index_value_1+1),:]
-two_final=two_final.iloc[:(index_value_2),:]
-
-volume_initial=two_initial['Volume'].sum()
-volume_final=two_final['Volume'].sum()
-volume_percent_change=(((volume_final-volume_initial)/volume_initial)*100).round(2)
-
-
-close_initial=two['Close'][index_value-1].round(2)
-close_final=two_final['Close'][index_value_2].round(2)
-close_percent_change=(((close_final-close_initial)/close_initial)*100).round(2)
-
-status_data = {'Price':             close_final,
-               'Price % change':    close_percent_change,
-               'Volume % change':   volume_percent_change}
-
-status=pd.DataFrame(status_data,index=['0'])
+##############################################################################
 
 
 
-
-
-
+##############################################################################
 
 
 
